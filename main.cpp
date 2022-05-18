@@ -15,6 +15,7 @@ struct cell{
     int layer;
     int x;
     int y;
+    bool valid;
 };
 
 
@@ -44,7 +45,7 @@ void findShortestPath(vector<vector<cell>  > new_board, int i, int j, int x, int
 
 int main (){
 
-    cout<< "in main" << endl;
+    // cout<< "in main" << endl;
     boardClass boardTest;
 
     boardTest.init();
@@ -80,6 +81,8 @@ void boardClass::findPath(){
             board[i][j].x = i;
             board[i][j].y = j;
             board[i][j].layer=1;
+            board[i][j].valid=true;
+            
 
         }
 
@@ -142,31 +145,32 @@ void boardClass::printGrid(vector<vector<cell>  > new_board)
     {
         for (int j = 0;j<Y_GRID_SIZE; j++)
         {   
-            if (new_board[i][j].value>=0 && new_board[i][j].value<10)
-                std::cout<<" "<<new_board[i][j].value<<" ";
-            else
-                std::cout<<new_board[i][j].value<<" ";
+                std::cout<<" "<<new_board[i][j].valid<<" ";
+            // if (new_board[i][j].value>=0 && new_board[i][j].value<10)
+            //     std::cout<<" "<<new_board[i][j].value<<" ";
+            // else
+            //     std::cout<<new_board[i][j].value<<" ";
         }
         std::cout<<std::endl;
     }
 }
 
 bool boardClass::isValid(vector<vector<cell>  > new_board ,int row, int col, int prev_cell){
-    cout << row<<"  "<<col << endl;
+    // cout << row<<"  "<<col << endl;
     if(row<0 || row>= X_GRID_SIZE || col<0 || col >= Y_GRID_SIZE )
     {
-        cout<<"cond 1\n";
+        // cout<<"cond 1\n";
         return false;
     }
-    if (new_board[row][col].value == OBSTACLE)
+    if (new_board[row][col].valid == false)
     {
     
-        cout<<"cond2\n";
+        // cout<<"cond2\n";
         return false;
     }
-    if (new_board[row][col].value == prev_cell-1)
+    if (new_board[row][col].value == prev_cell-1 )
     {
-        cout<<"true\n";
+        // cout<<"true\n";
         return true;
     }
 
@@ -174,7 +178,7 @@ bool boardClass::isValid(vector<vector<cell>  > new_board ,int row, int col, int
     {
         if (new_board[row][col].value == counter-1)
         {
-            cout<<"true\n";
+            // cout<<"true\n";
             return true;
         }
     }
@@ -186,16 +190,23 @@ void boardClass::findShortestPath(vector<vector<cell>  > new_board, int i, int j
     //if the destination is found, update `min_dist`
     if (i==x && j==y)
     {
-        cout<<"----------------------------------------"<<endl;
-        printGrid(new_board);
-        cout<<"----------------------------------------"<<endl;
+        // cout<<"here----------------------------------------"<<endl;
+        // printGrid(new_board);
+        // cout<<"----------------------------------------"<<endl;
         finalBoard = new_board;
         return;
     }
  
     // set (i, j) cell as visited
-    if (new_board[x][y].value != SOURCE && new_board[x][y].value != TARGERT )
-    new_board[i][j].value= OBSTACLE;
+    if (new_board[i][j].value != SOURCE && new_board[i][j].value != TARGERT ){
+
+        new_board[i][j].valid= false;
+        // cout<<"-------------------eeee---------------------"<<endl;
+
+        // printGrid(new_board);    
+        // cout<<"----------------------------------------"<<endl;
+
+    }
  
     // go to the bottom cell
     if (isValid(new_board, i + 1, j, new_board[i][j].value)) {

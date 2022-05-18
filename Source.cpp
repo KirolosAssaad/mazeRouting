@@ -144,12 +144,29 @@ void Lee_algorithm(int Grid[][COL], pin Src, pin Dest)
 
 }
 
+void record_paths(ofstream& file_name, vector<pair<string, vector<pin>>>PINS)
+{
+	file_name.open("output.txt");
+	for (int i = 0; i < PINS.size(); i++)
+	{
+		file_name << PINS[i].first << "  ";
+		for (int j = 0; j < PINS[i].second.size(); j++)
+		{
+			file_name << "(" << PINS[i].second[j].layer << ", " << PINS[i].second[j].X << ", " << PINS[i].second[j].Y << ") ";
+		}
+		file_name << endl;
+	}
+	file_name.close();
+}
+
 int main()
 {
 	ifstream file_name("Testcase_3.txt");
-	int Grid[80][80] = { 0 };
+	ofstream out_file;
+	//int Grid[80][80] = { 0 };
 	vector<pair<string, vector<pin>>>PINS;
+	vector<pair<string, vector<pin>>>CELLS;
 	PINS = read_nets(file_name, PINS);
-
+	record_paths(out_file, PINS);  //replace the vector PINS with the vector CELLS when it is filled
 	return 0;
 }

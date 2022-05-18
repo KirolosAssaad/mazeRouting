@@ -1,22 +1,26 @@
 #include <iostream>
-#define Y_GRID_SIZE 750
-#define X_GRID_SIZE 750
+#include <vector>
+#define Y_GRID_SIZE 10
+#define X_GRID_SIZE 10
 #define SOURCE 0
 #define TARGERT -1
 #define FREE_CELL -5
 #define OBSTACLE -6
 
+using namespace std;
+int counter;
 
 struct cell{
     int value;
-    int layer = 1;
+    int layer;
     int x;
     int y;
 };
 
 
 class boardClass{
-cell board[X_GRID_SIZE][Y_GRID_SIZE];
+public:
+vector<vector<cell>  > board;
 int SX;
 int SY;
 int TX;
@@ -27,20 +31,26 @@ void setSX(int sx);
 void setSY(int sy);
 void setTX(int tx);
 void setTY(int ty);
-void fillBoard();
+void findPath();
 void init();
-void printGrid();
+void printGrid(vector<vector<cell>  > new_board);
+bool isValid(vector<vector<cell>  > new_board ,int row, int col, int prev_cell);
+void findShortestPath(vector<vector<cell>  > new_board, int i, int j, int x, int y, vector<vector<cell>  > &finalBoard);
+
+
+
 };
 
 
 int main (){
 
-
+    cout<< "in main" << endl;
     boardClass boardTest;
 
     boardTest.init();
-    boardTest.printGrid();
+    boardTest.printGrid(boardTest.board);
     return 0;
+
 }
 
 void boardClass::setSX(int sx){
@@ -60,7 +70,8 @@ void boardClass::setTY(int ty){
     TY = ty;
 }
 
-void boardClass::fillBoard(){
+void boardClass::findPath(){
+    board.resize(X_GRID_SIZE, vector<cell>(Y_GRID_SIZE));
 
     for (int i = 0;i<X_GRID_SIZE;i++)
         for(int j = 0; j<Y_GRID_SIZE;j++)
@@ -68,6 +79,8 @@ void boardClass::fillBoard(){
             board[i][j].value = FREE_CELL;
             board[i][j].x = i;
             board[i][j].y = j;
+            board[i][j].layer=1;
+
         }
 
     board[SX][SY].value = SOURCE;
@@ -75,7 +88,7 @@ void boardClass::fillBoard(){
 
     bool atTarget = false;
 
-    int counter = 0;
+    counter = 0;
     while (!atTarget)
     {
         for(int i= 0;i<X_GRID_SIZE; i++)
@@ -107,31 +120,105 @@ void boardClass::fillBoard(){
         counter ++;
     }    
 
+    findShortestPath(board, TX, TY, SX, SY,  board);
+
 }
 
 
 
 void boardClass::init()
 {
-    setSX(5);
-    setSY(15);    
-    setTX(40);
-    setTY(20);
+    setSX(0);
+    setSY(1);    
+    setTX(5);
+    setTY(5);
 
-    fillBoard();
+    findPath();
 }
 
-void boardClass::printGrid()
+void boardClass::printGrid(vector<vector<cell>  > new_board)
 {
     for (int i =0; i<X_GRID_SIZE;i++)
     {
         for (int j = 0;j<Y_GRID_SIZE; j++)
         {   
-            if (board[i][j].value>=0 && board[i][j].value<10)
-                std::cout<<" "<<board[i][j].value<<" ";
+            if (new_board[i][j].value>=0 && new_board[i][j].value<10)
+                std::cout<<" "<<new_board[i][j].value<<" ";
             else
-                std::cout<<board[i][j].value<<" ";
+                std::cout<<new_board[i][j].value<<" ";
         }
         std::cout<<std::endl;
     }
 }
+
+bool boardClass::isValid(vector<vector<cell>  > new_board ,int row, int col, int prev_cell){
+    cout << row<<"  "<<col << endl;
+    if(row<0 || row>= X_GRID_SIZE || col<0 || col >= Y_GRID_SIZE )
+    {
+        cout<<"cond 1\n";
+        return false;
+    }
+    if (new_board[row][col].value == OBSTACLE)
+    {
+    
+        cout<<"cond2\n";
+        return false;
+    }
+    if (new_board[row][col].value == prev_cell-1)
+    {
+        cout<<"true\n";
+        return true;
+    }
+
+    if (prev_cell==-1)
+    {
+        if (new_board[row][col].value == counter-1)
+        {
+            cout<<"true\n";
+            return true;
+        }
+    }
+    return false;
+}
+
+void boardClass::findShortestPath(vector<vector<cell>  > new_board, int i, int j, int x, int y, vector<vector<cell>  > &finalBoard)
+{
+    //if the destination is found, update `min_dist`
+    if (i==x && j==y)
+    {
+        cout<<"----------------------------------------"<<endl;
+        printGrid(new_board);
+        cout<<"----------------------------------------"<<endl;
+        finalBoard = new_board;
+        return;
+    }
+ 
+    // set (i, j) cell as visited
+    if (new_board[x][y].value != SOURCE && new_board[x][y].value != TARGERT )
+    new_board[i][j].value= OBSTACLE;
+ 
+    // go to the bottom cell
+    if (isValid(new_board, i + 1, j, new_board[i][j].value)) {
+        findShortestPath(new_board, i + 1, j, x, y, finalBoard);
+    }
+ 
+    // go to the right cell
+    if (isValid(new_board, i, j + 1, new_board[i][j].value)) {
+        findShortestPath(new_board, i, j + 1, x, y, finalBoard);
+    }
+ 
+    // go to the top cell
+    if (isValid(new_board, i - 1, j, new_board[i][j].value)) {
+        findShortestPath(new_board, i - 1, j, x, y, finalBoard);
+    }
+ 
+    // go to the left cell
+    if (isValid(new_board, i, j - 1,new_board[i][j].value)) {
+        findShortestPath(new_board, i, j - 1, x, y, finalBoard);
+    }
+
+    // return;
+ 
+}
+
+ 
